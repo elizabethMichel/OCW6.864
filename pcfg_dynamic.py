@@ -5,6 +5,7 @@ import numpy as np
 # From Michael Collins' article Probabilistic Context-Free Grammars (PCFGs) of Columbia University.
 # http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/pcfgs.pdf
 # Implementation of the CKY algorithm for PCFGs on page 14.
+# July 12th 2024.
 def main():
     # Sentence for which we want to find the parse tree.
     sentence = ["the", "dog", "saw", "the", "man", "with", "the", "telescope"]
