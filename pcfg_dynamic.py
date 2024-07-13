@@ -55,7 +55,7 @@ def cky_algorithm(sentence: list, t_rules: dict, nt_rules: dict):
         for i in range(0, s_length - length):
             j = i + length
             max_prob = 0
-            max_cat = ""
+            current_x = ""
             candidate = ""
             # Partition of the span : words of the sub-sentence are divided into two groups (y and z).
             for s in range(i, j):
@@ -69,12 +69,12 @@ def cky_algorithm(sentence: list, t_rules: dict, nt_rules: dict):
 
                 if current_prob > max_prob:
                     max_prob = current_prob
-                    max_cat = x
+                    current_x = x
                     candidate = ((j, i), (s, i), (j, s + 1))
 
             # Update table on probability and category of the best parse-tree for span.
             table[j, i] = max_prob
-            cat_table[j, i] = max_cat
+            cat_table[j, i] = current_x
             if candidate != "":
                 subtree.append(candidate)
     print_table(sentence, table)
@@ -95,21 +95,19 @@ def inside_algorithm(sentence: list, t_rules: dict, nt_rules: dict):
             j = i + length
 
             span_prob = 0
-            max_cat = ""
-            max_prod = 0
+            current_x = ""
             # Partition of the span : words of the sub-sentence are divided into two groups (y and z).
             for s in range(i, j):
                 x, rule_prob = nt_rules.get(cat_table[s, i] + cat_table[j, s + 1], ("", 0))
                 current_prob = rule_prob * table[s, i] * table[j, s + 1]
                 # Probabilities are added for every subtree.
                 span_prob += current_prob
-                if current_prob > max_prod:
-                    max_cat = x
-                    max_prod = current_prob
+                if current_prob > 0:
+                    current_x = x
 
-            # Update table on probability and category of the best parse-tree for span.
+            # Update table on sum of probabilities and current category.
             table[j, i] = span_prob
-            cat_table[j, i] = max_cat
+            cat_table[j, i] = current_x
     print_table(sentence, table)
 
 
