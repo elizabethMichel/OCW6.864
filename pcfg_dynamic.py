@@ -7,7 +7,7 @@ import numpy as np
 # Implementation of the CKY algorithm for PCFGs on page 14 (July 12th 2024)
 def main():
     # Sentence for which we want to find the parse tree.
-    sentence = ["the", "dog", "saw", "the", "man", "with", "the", "telescope"]
+    sentence = ["the", "man", "saw", "the", "dog", "with", "the", "telescope"]
 
     # Non-terminal rules and their probability to occur (key is right-side of the rule for easier retrieval).
     non_terminal_rules = {"NPVP": ("SS", 1),
@@ -27,6 +27,7 @@ def main():
 
     # Compute the parse tree.
     cky_algorithm(sentence, terminal_rules, non_terminal_rules)
+    inside_algorithm(sentence, terminal_rules, non_terminal_rules)
 
 
 # Tag words in sentence with grammatical categories from terminal rules dictionary.
@@ -80,6 +81,36 @@ def cky_algorithm(sentence: list, t_rules: dict, nt_rules: dict):
     print_str_table(sentence, cat_table)
     subtree_dict = {x[0]: (x[0], x[1], x[2]) for x in subtree}
     reconstruct_tree(subtree_dict, cat_table, subtree[-1], sentence)
+
+
+# Determine the probability of a sentence by summing all parse trees.
+def inside_algorithm(sentence: list, t_rules: dict, nt_rules: dict):
+    s_length = len(sentence)
+    table, cat_table = init_table(sentence, t_rules)
+
+    # Length of the span.
+    for length in range(1, s_length):
+        # Start of the span.
+        for i in range(0, s_length - length):
+            j = i + length
+
+            span_prob = 0
+            max_cat = ""
+            max_prod = 0
+            # Partition of the span : words of the sub-sentence are divided into two groups (y and z).
+            for s in range(i, j):
+                x, rule_prob = nt_rules.get(cat_table[s, i] + cat_table[j, s + 1], ("", 0))
+                current_prob = rule_prob * table[s, i] * table[j, s + 1]
+                # Probabilities are added for every subtree.
+                span_prob += current_prob
+                if current_prob > max_prod:
+                    max_cat = x
+                    max_prod = current_prob
+
+            # Update table on probability and category of the best parse-tree for span.
+            table[j, i] = span_prob
+            cat_table[j, i] = max_cat
+    print_table(sentence, table)
 
 
 # Initialize the square table by sentence's length, and populate its diagonal.
